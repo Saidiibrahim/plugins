@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "ibby-plugins",
+  "version": "1.0.0",
+  "description": "Ibrahim's personal Claude Code plugin marketplace",
+  "owner": {
+    "name": "Ibrahim Saidi"
+  },
+  "plugins": [
+    {
+      "name": "design-school",
+      "description": "Watch a design video, extract rules with adversarial verification, capture supporting frames, and publish the lesson to a Notion library that coding agents consult during design work.",
+      "version": "1.0.0",
+      "source": "./design-school",
+      "category": "productivity",
+      "keywords": ["design", "notion", "video", "research", "transcript", "ffmpeg"]
+    }
+  ]
+}

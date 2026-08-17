@@ -1,0 +1,18 @@
+{
+  "name": "design-school",
+  "version": "1.0.0",
+  "description": "Turn a design video into a verified, agent-readable lesson page in Notion: transcript via yt-dlp, rules extracted by parallel lens agents and checked by adversarial verifiers, supporting frames via ffmpeg, published with deep-linked evidence.",
+  "author": {
+    "name": "Ibrahim Saidi"
+  },
+  "license": "MIT",
+  "keywords": [
+    "design",
+    "notion",
+    "video",
+    "transcript",
+    "ffmpeg",
+    "yt-dlp",
+    "research"
+  ]
+}
