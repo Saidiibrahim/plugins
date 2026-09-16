@@ -34,8 +34,23 @@ that lookup if unknown.
 python3 "$FILES/check-print-ready.py" koala.png --width-in 12 --height-in 16 --dpi 150 --technique dtg
 ```
 
-Needs Pillow. If it exits with "Pillow is not installed", offer
-`python3 -m pip install --user Pillow` (or a virtualenv); do not install
+Needs Pillow. If it exits with "Pillow is not installed", install it. On
+systems with PEP 668 externally-managed Python (most modern Linux
+distributions), use a virtual environment:
+
+```bash
+# Create a venv (once, in your working directory or a shared location):
+python3 -m venv ~/.local/venvs/printful-automation
+# Activate it (in each shell session):
+source ~/.local/venvs/printful-automation/bin/activate
+# Install Pillow:
+pip install Pillow
+# Use the scripts normally while the venv is active, or call them through the venv:
+~/.local/venvs/printful-automation/bin/python3 "$FILES/check-print-ready.py" koala.png ...
+```
+
+On older systems or user-managed Python installs,
+`python3 -m pip install --user Pillow` may work without a venv. Do not install
 without asking.
 
 Output is JSON: `width_px`, `height_px`, `mode`, `has_alpha`,
@@ -90,6 +105,68 @@ with no login, cookies or expiring signature, and should stay up at least
 until the order ships (keep it permanently if the design will be reordered).
 Never use chat attachments, Google Drive/Dropbox preview pages, or presigned
 URLs.
+
+### First-run hosting setup
+
+Before hosting any designs, verify Node.js and wrangler are installed, then
+complete the one-time Cloudflare R2 setup:
+
+1. **Check Node.js and wrangler:**
+   ```bash
+   node --version  # needs Node.js 18 or later
+   wrangler --version || npm install -g wrangler
+   ```
+
+2. **Authenticate with Cloudflare:**
+   - **OAuth (recommended):** `wrangler login` opens the browser for one-click
+     approval. The token is saved in `~/.wrangler/config/` and works for all
+     R2 operations.
+   - **API token (for non-interactive environments):** Create a token at
+     Cloudflare dashboard > My Profile > API Tokens with "Edit" permission for
+     "Account - Cloudflare R2 Storage". Export as
+     `CLOUDFLARE_API_TOKEN=<token>` and `CLOUDFLARE_ACCOUNT_ID=<id>`.
+
+3. **Create and enable a public R2 bucket:**
+   ```bash
+   wrangler r2 bucket create merch-designs
+   wrangler r2 bucket dev-url enable merch-designs
+   # Note the public URL printed (https://pub-<hash>.r2.dev)
+   ```
+   
+   For production or high-volume use, add a custom domain instead of the dev
+   URL (see dashboard R2 > bucket > Settings > Custom Domains).
+
+4. **Write the config file:**
+   Create `~/.config/printful-automation/config.json` (permissions `600`) with
+   at least:
+   ```json
+   {
+     "design_hosting": {
+       "provider": "r2",
+       "public_base_url": "https://pub-xxxxxxxx.r2.dev",
+       "bucket": "merch-designs"
+     }
+   }
+   ```
+   
+   Full config format is in `printful-api/SKILL.md`.
+
+5. **Smoke test the setup:**
+   Create a tiny test PNG, upload it, and verify it is publicly accessible:
+   ```bash
+   python3 -c 'from PIL import Image; Image.new("RGB",(8,8),"red").save("test.png")'
+   URL="$(bash "$FILES/host-design.sh" test.png)"
+   curl -sI "$URL" | awk 'NR==1 || tolower($1)=="content-type:"'
+   # Should see: HTTP/1.1 200 OK and content-type: image/png
+   rm test.png
+   ```
+   
+   If the HTTP status is 403 or 404, the bucket public access is not enabled;
+   re-run the `dev-url enable` step.
+
+Once setup is complete, use `host-design.sh` for all design uploads.
+
+### Hosting a design
 
 Read `design_hosting` from the config (`provider`, `public_base_url`,
 `bucket`), then:

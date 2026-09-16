@@ -55,10 +55,30 @@ for p in json.load(sys.stdin)["data"]:
 ```
 
 Record `W_IN`, `H_IN` and the minimum `DPI` for the chosen placement and
-technique. Target pixels = inches x 300 (ideal), never below inches x
-`DPI` (usually 150). Use `W_IN:H_IN` as the generation aspect ratio. For
-designs that should not fill the area (left chest, small centre logo),
-decide the intended printed size with the user and use that instead.
+technique. Calculate the **minimum** required pixels:
+`MIN_PX = W_IN * DPI` x `H_IN * DPI` (e.g. 12 x 16 in @ 150 dpi = 1800 x
+2400 px). Calculate the **ideal** target pixels: `IDEAL_PX = W_IN * 300` x
+`H_IN * 300` (e.g. 3600 x 4800 px). Use `W_IN:H_IN` as the generation aspect
+ratio. For designs that should not fill the area (left chest, small centre
+logo), decide the intended printed size with the user and use that instead.
+
+**DPI guidance for generation:**
+- Always aim to generate at a size that meets at least the 150 dpi minimum
+  (MIN_PX), preferably closer to 300 dpi (IDEAL_PX), within the provider's
+  capabilities.
+- For OpenAI: the automatic size selection in `generate-image.py` may produce
+  images below 150 dpi for large print areas. Calculate the target pixels
+  first and use `--size WxH` explicitly when the print area is large
+  (e.g. `--size 3600x4800` for 12x16 in @ 300 dpi, or at minimum
+  `--size 1800x2400` for 12x16 in @ 150 dpi). OpenAI supports up to 3840 px
+  on the long edge.
+- For Ideogram transparent: use `--resolution 4K` or `8K` when the print area
+  requires it to meet 150 dpi.
+- For Recraft: choose the aspect ratio; Recraft generates at high resolution
+  by default.
+- If the first generation fails print-check due to low DPI, calculate the
+  required size and regenerate once at the correct dimensions rather than
+  discovering after multiple attempts.
 
 ## 2. Write the prompt for print
 

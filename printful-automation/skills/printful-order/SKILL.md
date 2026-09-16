@@ -56,7 +56,24 @@ no, and never skip the conversation check it cannot do.
    to me", "send it home"). For anyone else ask for name, address1, city,
    state_code (required for AU, US, CA), country_code, zip, and email. Never
    guess an address.
-3. **Build `order_items`.**
+3. **Pre-order readiness check.** Before creating the draft, verify:
+   - **Recipient completeness:** `name`, `address1`, `city`, `country_code`,
+     and `zip` are required. `state_code` is also required for AU, US, and CA
+     deliveries. `email` and `phone` are strongly recommended.
+   - **Design URL accessibility:** For each design file URL in the placements,
+     run `curl -sI <url>` and confirm it returns HTTP 200 with
+     `content-type: image/png` or `image/jpeg`. A 403, 404, or redirect means
+     Printful cannot fetch the file; fix bucket permissions or re-host.
+   - **Billing method:** The Printful API cannot set billing details. Remind
+     the user that their Printful dashboard must have a valid billing method
+     configured (Printful Wallet with auto-recharge, credit card, or PayPal)
+     before confirming the order, or payment will fail. Check at
+     https://www.printful.com/dashboard/billing.
+   
+   Surface these checks in the summary before creating the draft so problems
+   are caught early.
+4. **Build `order_items`.**
+4. **Build `order_items`.**
    - From a design spec (`<slug>.design.json`, written by `printful-product`):
      for each chosen variant in `catalog_variant_ids`, first re-check
      `GET /v2/catalog-variants/<id>/availability?selling_region_name=<config selling_region>`
@@ -71,7 +88,7 @@ no, and never skip the conversation check it cannot do.
    - Dashboard template: `source: "product_template"`, `product_template_id`,
      `catalog_variant_id`, `quantity`.
    - Add an `external_id` to the order when the user has a reference for it.
-4. **Shipping options.** `POST /v2/shipping-rates` with `recipient`,
+5. **Shipping options.** `POST /v2/shipping-rates` with `recipient`,
    `order_items` (only `source: "catalog"` is accepted here: for a template
    item send its `catalog_variant_id` as a catalog item) and `currency`.
    Present a table: method (`shipping`, `shipping_method_name`), `rate` and
@@ -80,15 +97,15 @@ no, and never skip the conversation check it cannot do.
    `departure_country` is not `AU` (slower, possible duties) or
    `customs_fees_possible` is true. Default to config `default_shipping` if
    offered, else the cheapest; let the user choose.
-5. **Create the draft.** `POST /v2/orders` with `shipping`, `recipient`,
+6. **Create the draft.** `POST /v2/orders` with `shipping`, `recipient`,
    `order_items` (and `external_id`, `customization` if wanted). v2 always
    creates a draft. Note `data.id`.
-6. **Wait for costs.** `bash "$WAIT" <id> > /tmp/pf-order-<id>.json`.
+7. **Wait for costs.** `bash "$WAIT" <id> > /tmp/pf-order-<id>.json`.
    On exit `2`, show the order and explain why (usually a bad placement,
    an unreachable design URL, an unavailable variant or an address problem),
    fix it by editing the draft (section 6) and wait again. On `124`, say
    costs are still calculating and offer to check again shortly.
-7. **Summarise.** Get full items with
+8. **Summarise.** Get full items with
    `GET /v2/orders/<id>/order-items?type=order_item` for the placements, then
    show:
 
@@ -105,7 +122,7 @@ no, and never skip the conversation check it cannot do.
    | **Total** | `costs.total` + `costs.currency` |
 
    Also give the dashboard link `https://www.printful.com/dashboard/default/orders`.
-8. **Confirmation gate** (section 4).
+9. **Confirmation gate** (section 4).
 
 ## 2. Order a saved store product (v1)
 
