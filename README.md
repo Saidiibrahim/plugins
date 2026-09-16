@@ -38,7 +38,7 @@ change; components reload on the next session.
 | Plugin | What it does |
 |---|---|
 | [design-school](./design-school) | Turns a design video into a verified, agent-readable lesson page in Notion — transcript via `yt-dlp`, rules extracted and adversarially verified by a 12-agent workflow, supporting frames via `ffmpeg`. |
-| [printful-automation](./printful-automation) | Runs a Printful print-on-demand store through its REST API: catalog, mockups, products, design files, orders and reports. Follows the [Agent Plugins](https://agent-plugins.org/specification) v1.0.0 standard. |
+| [printful-automation](./printful-automation) | Designs, buys and ships custom Printful merch: AI-generated artwork, print checks, catalog and mockups, paid orders, delivery tracking and spend reports (Printful API v2 first, v1 for gaps). Follows the [Agent Plugins](https://agent-plugins.org/specification) v1.0.0 standard. |
 
 ## Adding a new plugin
 

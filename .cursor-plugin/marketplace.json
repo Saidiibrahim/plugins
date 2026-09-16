@@ -10,7 +10,7 @@
     {
       "name": "printful-automation",
       "source": "printful-automation",
-      "description": "Automate a Printful print-on-demand store: browse the catalog, generate mockups, create products, manage design files, place and track orders, and produce store reports through the Printful REST API. Packaged to the Agent Plugins v1.0.0 standard."
+      "description": "Design, buy and ship custom merch with Printful: generate artwork with image APIs, check print readiness, browse the catalog and make mockups, place and pay for orders, track deliveries and report spending. Uses Printful API v2 first, with v1 only for saved products and cancellations. Packaged to the Agent Plugins v1.0.0 standard."
     },
     {
       "name": "design-school",
