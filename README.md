@@ -1,8 +1,20 @@
 # ibby-plugins
 
-Ibrahim's personal Claude Code plugin marketplace.
+Ibrahim's personal plugin marketplace for Claude Code and Cursor.
 
 ## Add the marketplace
+
+### Cursor Team Marketplace
+
+Import this repository as a Cursor Team Marketplace:
+
+1. Go to **Dashboard → Plugins → Import from Repo**
+2. Enter the repository URL or local path
+3. Install plugins from the team marketplace:
+   - `printful-automation` — Agent Plugins v1.0.0 format, portable across clients
+   - `design-school` — Claude Code legacy format
+
+### Claude Code
 
 Once, from any project:
 
