@@ -1,0 +1,21 @@
+{
+  "name": "ibby-plugins",
+  "owner": {
+    "name": "Ibrahim Saidi"
+  },
+  "metadata": {
+    "description": "Ibrahim's personal plugin marketplace for Cursor and Agent Plugins"
+  },
+  "plugins": [
+    {
+      "name": "printful-automation",
+      "source": "printful-automation",
+      "description": "Automate a Printful print-on-demand store: browse the catalog, generate mockups, create products, manage design files, place and track orders, and produce store reports through the Printful REST API. Packaged to the Agent Plugins v1.0.0 standard."
+    },
+    {
+      "name": "design-school",
+      "source": "design-school",
+      "description": "Watch a design video, extract rules with adversarial verification, capture supporting frames, and publish the lesson to a Notion library that coding agents consult during design work."
+    }
+  ]
+}
