@@ -14,6 +14,17 @@
       "source": "./design-school",
       "category": "productivity",
       "keywords": ["design", "notion", "video", "research", "transcript", "ffmpeg"]
+    },
+    {
+      "name": "printful-automation",
+      "description": "Automate a Printful print-on-demand store: browse the catalog, generate mockups, create products, manage design files, place and track orders, and produce store reports through the Printful REST API. Packaged to the Agent Plugins v1.0.0 standard.",
+      "version": "0.1.0",
+      "author": { "name": "Ibrahim Saidi" },
+      "source": "./printful-automation",
+      "category": "productivity",
+      "homepage": "https://developers.printful.com/docs/",
+      "license": "MIT",
+      "keywords": ["printful", "print-on-demand", "ecommerce", "merch", "orders", "mockups", "agent-plugins"]
     }
   ]
 }

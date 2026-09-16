@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "printful-automation",
+  "version": "0.1.0",
+  "description": "Automate a Printful print-on-demand store: browse the catalog, generate mockups, create products, manage design files, place and track orders, and produce store reports through the Printful REST API.",
+  "author": {
+    "name": "Ibrahim Saidi"
+  },
+  "homepage": "https://developers.printful.com/docs/",
+  "repository": "https://github.com/Saidiibrahim/plugins",
+  "license": "MIT",
+  "keywords": ["printful", "print-on-demand", "ecommerce", "merch", "orders", "mockups"]
+}
