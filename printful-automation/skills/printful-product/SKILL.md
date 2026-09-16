@@ -233,14 +233,19 @@ in v2 orders or mockups with `source: "product_template"` and
 
 Map the spec to the v1 body (see `endpoints-v1.md`):
 
-- `sync_product`: `name`, `external_id` = slug, `thumbnail` = a hosted
-  mockup URL (upload the chosen mockup through the `printful-files` hosting
-  step first, since Printful's mockup URLs expire).
+- `sync_product`: `name`, `external_id` = slug, `thumbnail` = a permanently
+  hosted **mockup** URL (not the flat print file). Choose one lifestyle or
+  flat mockup image from the mockup task, upload it through the
+  `printful-files` hosting step to get a permanent public URL, and use that
+  for `thumbnail`. This makes the product display properly with clothing in
+  the Printful dashboard. The print file itself goes only on the placement
+  `files[]`, not on `thumbnail`.
 - One `sync_variants[]` per `catalog_variant_id`: `variant_id` = the catalog
   variant id, `external_id` = `<slug>-<size>-<colour>`, `retail_price` (the
   user's figure, or the estimate for a personal store), and
   `files[]` = one entry per v2 placement:
-  `{ "type": "<placement>", "url": "<layer url>" }`.
+  `{ "type": "<placement>", "url": "<layer url>" }` (use the print file URL,
+  not a mockup).
 - Do **not** copy v2 inch positions into v1 `position`; v1 positions are
   pixels. Omit `position` (Printful auto-fits). Only if the user needs a
   specific placement, convert using `GET /mockup-generator/printfiles/{product_id}`
@@ -253,7 +258,10 @@ Show a one-screen summary (name, variants, prices, placements), get a go-ahead,
 then `bash "$PF" POST /store/products @body.json`. Record
 `sync_product.id` and each `sync_variants[].id` (keyed by catalog variant id)
 into the spec's `v1` block, and give the dashboard link
-`https://www.printful.com/dashboard/sync-products/<id>`.
+`https://www.printful.com/dashboard/product-templates/published/{storeId}/{syncProductId}`
+(the store id comes from the Printful API token; `sync_product.id` is the
+`syncProductId`). Note: the old URL pattern
+`/dashboard/sync-products/{id}` returns 404; use the product-templates URL.
 
 ### Update, add, delete, list
 

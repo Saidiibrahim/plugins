@@ -6,6 +6,26 @@ for designing, buying and shipping your own custom merch through
 API. The plugin checks it is print-ready, hosts it, makes mockups, places and
 pays for the order, and tracks the delivery.
 
+## Recent improvements (v0.3.0)
+
+- **Simplified design hosting setup:** Added comprehensive first-run setup
+  guide for Cloudflare R2 with smoke tests. Fixed `host-design.sh` wrangler
+  cache directory issues and improved reliability.
+- **Better DPI handling:** Enhanced guidance in `printful-design` to ensure
+  generated images meet at least 150 dpi (ideally 300 dpi) for print areas,
+  preventing low-resolution failures.
+- **Correct store product thumbnails:** Fixed `printful-product` to use hosted
+  mockup images (not flat print files) as store product thumbnails, ensuring
+  proper dashboard display.
+- **Accurate dashboard URLs:** Corrected the Printful dashboard URL pattern for
+  saved products to
+  `/dashboard/product-templates/published/{storeId}/{syncProductId}`.
+- **Pre-order validation:** Added pre-order readiness checklist in
+  `printful-order` to verify recipient completeness, design URL accessibility,
+  and billing method before draft creation.
+- **Python venv support:** Documented virtual environment usage for Pillow
+  installation on PEP 668 externally-managed systems.
+
 ## Layout
 
 ```text

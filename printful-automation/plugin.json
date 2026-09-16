@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "printful-automation",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Design, buy and ship custom merch with Printful: generate artwork with image APIs, check print readiness, browse the catalog and make mockups, place and pay for orders, track deliveries and report spending. Uses Printful API v2 first, with v1 only for saved products and cancellations.",
   "author": {
     "name": "Ibrahim Saidi"
