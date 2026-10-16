@@ -18,7 +18,7 @@
     {
       "name": "printful-automation",
       "description": "Design, buy and ship custom merch with Printful: generate artwork with image APIs, check print readiness, browse the catalog and make mockups, place and pay for orders, track deliveries and report spending. Uses Printful API v2 first, with v1 only for saved products and cancellations. Packaged to the Agent Plugins v1.0.0 standard.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "author": { "name": "Ibrahim Saidi" },
       "source": "./printful-automation",
       "category": "productivity",
