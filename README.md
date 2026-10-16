@@ -68,9 +68,12 @@ Claude Code-only layout shown under *Legacy layout* below.)
    }
    ```
 
-2. Register it in `.claude-plugin/marketplace.json` and include `description`,
-   `version`, `author` and `keywords`. Claude Code reads these from the
-   marketplace entry because the plugin has no `.claude-plugin/plugin.json`.
+2. Register it in `.claude-plugin/marketplace.json` with `"strict": false` and
+   include `description`, `version`, `author` and `keywords`. The plugin has no
+   `.claude-plugin/plugin.json`, so the marketplace entry is its manifest.
+   Claude Code tolerates a missing `strict`, but the claude.ai plugin sync
+   skips the plugin without it ("requires .claude-plugin/plugin.json or a
+   top-level SKILL.md"). Keep the entry's `version` in step with `plugin.json`.
 
 3. `/plugin marketplace update ibby-plugins`, then
    `/plugin install my-plugin@ibby-plugins`.

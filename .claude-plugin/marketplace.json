@@ -21,6 +21,7 @@
       "version": "0.2.0",
       "author": { "name": "Ibrahim Saidi" },
       "source": "./printful-automation",
+      "strict": false,
       "category": "productivity",
       "homepage": "https://developers.printful.com/docs/",
       "license": "MIT",
