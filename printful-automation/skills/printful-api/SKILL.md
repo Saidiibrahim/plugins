@@ -12,7 +12,7 @@ description: >
 license: MIT
 compatibility: Requires either the Printful connector from the same plugin (Claude chat), or bash, curl, python3, network access to api.printful.com and a PRINTFUL_API_TOKEN environment variable. jq recommended.
 metadata:
-  version: "0.3.1"
+  version: "0.4.0"
 ---
 
 # Printful API conventions

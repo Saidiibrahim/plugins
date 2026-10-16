@@ -10,7 +10,7 @@ description: >
 license: MIT
 compatibility: Requires python3, curl, network access, at least one image API key (OPENAI_API_KEY, IDEOGRAM_API_KEY, RECRAFT_API_TOKEN, GEMINI_API_KEY, BFL_API_KEY or FAL_KEY), the printful-api, printful-product, printful-files and printful-order skills from the same plugin, and Pillow for the print-file checks.
 metadata:
-  version: "0.3.1"
+  version: "0.4.0"
 ---
 
 # Printful design generation
