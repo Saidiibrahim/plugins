@@ -17,15 +17,16 @@
     },
     {
       "name": "printful-automation",
-      "description": "Design, buy and ship custom merch with Printful: generate artwork with image APIs, check print readiness, browse the catalog and make mockups, place and pay for orders, track deliveries and report spending. Uses Printful API v2 first, with v1 only for saved products and cancellations. Packaged to the Agent Plugins v1.0.0 standard.",
-      "version": "0.3.0",
+      "description": "Design, buy and ship custom merch with Printful: generate artwork with image APIs, check print readiness, browse the catalog and make mockups, place and pay for orders, track deliveries and report spending. Uses Printful API v2 first, with v1 only for saved products and cancellations.",
+      "version": "0.3.1",
       "author": { "name": "Ibrahim Saidi" },
       "source": "./printful-automation",
       "strict": false,
       "category": "productivity",
       "homepage": "https://developers.printful.com/docs/",
+      "repository": "https://github.com/Saidiibrahim/plugins",
       "license": "MIT",
-      "keywords": ["printful", "print-on-demand", "merch", "orders", "mockups", "image-generation", "agent-plugins"]
+      "keywords": ["printful", "print-on-demand", "merch", "orders", "mockups", "image-generation", "australia"]
     }
   ]
 }

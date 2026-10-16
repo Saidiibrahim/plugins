@@ -12,7 +12,7 @@ description: >
 license: MIT
 compatibility: Requires bash, curl, python3, network access to api.printful.com, and a PRINTFUL_API_TOKEN environment variable. jq recommended.
 metadata:
-  version: "0.2.0"
+  version: "0.3.1"
 ---
 
 # Printful API conventions
