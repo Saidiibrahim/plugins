@@ -1,0 +1,25 @@
+{
+	"name": "printful-mcp",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "cf dev",
+		"build": "cf build",
+		"deploy": "cf deploy",
+		"typecheck": "cf workers types && tsc",
+		"test": "node --test test/*.test.ts",
+		"test:e2e": "bash test/e2e/run.sh"
+	},
+	"devDependencies": {
+		"@cloudflare/vite-plugin": "beta",
+		"cf": "^1.0.0-beta.5",
+		"typescript": "^7.0.2",
+		"vite": "^8.3.0"
+	},
+	"dependencies": {
+		"@cloudflare/workers-oauth-provider": "^1.2.3",
+		"@modelcontextprotocol/server": "^2.3.1",
+		"agents": "^0.28.1",
+		"zod": "^4.6.7"
+	}
+}

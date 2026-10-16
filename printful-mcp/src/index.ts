@@ -1,0 +1,64 @@
+import { insufficientScope, type OAuthResourceContext, OAuthProvider } from "@cloudflare/workers-oauth-provider";
+import { createMcpHandler } from "agents/mcp/server";
+import { handleAuthorize, type Props, SCOPE } from "./authorize.ts";
+import { createServer } from "./tools.ts";
+
+const DAY = 24 * 60 * 60;
+
+const mcpHandler = {
+	fetch(request: Request, env: Env, ctx: ExecutionContext) {
+		const { props, auth } = ctx as unknown as OAuthResourceContext<Props>;
+		if (!auth.scope.includes(SCOPE)) return insufficientScope(auth, [SCOPE]);
+		const printful = { token: props.token, storeId: props.storeId };
+		return createMcpHandler(() => createServer(env.PRINTFUL_API_BASE, printful))(request, env, ctx);
+	},
+};
+
+const siteHandler = {
+	fetch(request: Request, env: Env) {
+		const { origin, pathname } = new URL(request.url);
+		if (pathname === "/authorize") return handleAuthorize(request, env as Env & Parameters<typeof handleAuthorize>[1]);
+		if (pathname === "/") {
+			return new Response(
+				`Printful MCP connector for the printful-automation plugin.\nAdd ${origin}/mcp as a connector in Claude; you'll be asked for a Printful private token.\n`,
+				{ headers: { "Content-Type": "text/plain; charset=utf-8" } },
+			);
+		}
+		return new Response("Not found", { status: 404 });
+	},
+};
+
+// Tokens are bound to the origin the client used (workers.dev, a custom domain or
+// localhost), so each origin gets its own provider and resource identifier.
+const providers = new Map<string, OAuthProvider<Env>>();
+
+function providerFor(origin: string): OAuthProvider<Env> {
+	let provider = providers.get(origin);
+	if (!provider) {
+		provider = new OAuthProvider<Env>({
+			apiRoute: "/mcp",
+			apiHandler: mcpHandler,
+			defaultHandler: siteHandler,
+			authorizeEndpoint: "/authorize",
+			tokenEndpoint: "/oauth/token",
+			clientRegistrationEndpoint: "/oauth/register",
+			clientIdMetadataDocumentEnabled: true,
+			scopesSupported: [SCOPE],
+			requiredScopes: [SCOPE],
+			resourceMetadata: {
+				resource: `${origin}/mcp`,
+				authorization_servers: [origin],
+			},
+			refreshTokenTTL: 365 * DAY,
+			refreshTokenIdleTTL: 90 * DAY,
+		});
+		providers.set(origin, provider);
+	}
+	return provider;
+}
+
+export default {
+	fetch(request: Request, env: Env, ctx: ExecutionContext) {
+		return providerFor(new URL(request.url).origin).fetch(request, env, ctx);
+	},
+} satisfies ExportedHandler<Env>;
