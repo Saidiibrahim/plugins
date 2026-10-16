@@ -55,6 +55,10 @@ BASE="${BASE%/}"
 [ -n "$BASE" ] || die "design_hosting.public_base_url is not set in $CONFIG"
 case "$BASE" in https://*) ;; *) die "public_base_url must be https" ;; esac
 
+# Set safe cache directory for wrangler to avoid /node_modules/.cache/wrangler write errors
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+mkdir -p "$XDG_CACHE_HOME/wrangler" 2>/dev/null || true
+
 NAME="$(basename "$FILE")"
 if [ -z "$KEY" ]; then
   SAFE="$(printf '%s' "$NAME" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/-+/-/g; s/-\./\./g; s/^-//')"
@@ -84,6 +88,8 @@ if command -v aws >/dev/null 2>&1 && [ -n "${R2_ACCOUNT_ID:-}" ] \
    && [ -n "${AWS_ACCESS_KEY_ID:-}" ] && [ -n "${AWS_SECRET_ACCESS_KEY:-}" ]; then
   CMD=(aws s3 cp "$FILE" "s3://$BUCKET/$KEY" --content-type "$CTYPE"
        --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" --region auto)
+elif [ -x "./node_modules/.bin/wrangler" ]; then
+  CMD=(./node_modules/.bin/wrangler r2 object put "$BUCKET/$KEY" --file "$FILE" --content-type "$CTYPE" --remote)
 elif command -v wrangler >/dev/null 2>&1; then
   CMD=(wrangler r2 object put "$BUCKET/$KEY" --file "$FILE" --content-type "$CTYPE" --remote)
 elif command -v npx >/dev/null 2>&1; then
