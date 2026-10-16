@@ -6,7 +6,16 @@ for designing, buying and shipping your own custom merch through
 API. The plugin checks it is print-ready, hosts it, makes mockups, places and
 pays for the order, and tracks the delivery.
 
-## Recent improvements (v0.3.0)
+## Changelog
+
+### v0.3.1
+
+- Syncs to claude.ai: the marketplace entry sets `"strict": false`, and its
+  description, keywords and version now match `plugin.json`.
+- Documents the domains Claude's code sandbox must allow (see
+  [Claude Code and claude.ai](#claude-code-and-claudeai)).
+
+### v0.3.0
 
 - **Simplified design hosting setup:** Added comprehensive first-run setup
   guide for Cloudflare R2 with smoke tests. Fixed `host-design.sh` wrangler
@@ -158,15 +167,36 @@ files.
   customs fees.
 - Australian addresses need a `state_code` (`SA` for Adelaide).
 
-## Claude Code
+## Claude Code and claude.ai
 
-The marketplace entry for this repo (`../.claude-plugin/marketplace.json`)
-supplies the details Claude Code shows. Claude Code finds `skills/` without a
-`.claude-plugin/plugin.json`:
+The plugin has no `.claude-plugin/plugin.json`. Its entry in
+`../.claude-plugin/marketplace.json` is the manifest instead, so that entry
+sets `"strict": false` (claude.ai's marketplace sync skips the plugin without
+it) and repeats the `version`, `description` and `keywords` from
+`plugin.json`. Bump all three versions together: `plugin.json`, the
+marketplace entry and each skill's `metadata.version`. claude.ai syncs again
+when a merged pull request bumps the version.
 
 ```bash
 /plugin install printful-automation@ibby-plugins
 ```
+
+In claude.ai chat, the skills run in Claude's code-execution sandbox. If its
+network egress (**Settings > Capabilities**) is not set to all domains, add
+the ones you need to the allowlist. Pillow installs from PyPI, which the
+package-manager setting covers.
+
+| Needed for | Domains |
+| --- | --- |
+| Every skill | `api.printful.com` |
+| Image generation (whichever you use) | `api.openai.com`, `api.ideogram.ai`, `external.api.recraft.ai`, `generativelanguage.googleapis.com`, `api.bfl.ai`, `fal.run`, `queue.fal.run`, `api.replicate.com` |
+| R2 hosting | `api.cloudflare.com` (wrangler) or `<account-id>.r2.cloudflarestorage.com` (aws CLI), plus your bucket's public host |
+
+The sandbox has no shell profile, and its home directory does not last
+between conversations, so `PRINTFUL_API_TOKEN` and
+`~/.config/printful-automation/config.json` are not there by default. Claude
+Code, and other clients running on your own machine, read both as described
+in [Setup](#setup).
 
 ## API notes
 
