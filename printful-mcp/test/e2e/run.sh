@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# End-to-end test: runs the Worker locally (cf dev --mode mock) against a
+# Printful stand-in and walks the whole OAuth sign-in and MCP tool flow.
+set -euo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$HERE/../.." && pwd)"
+LOG="$(mktemp)"
+DEV_LOG="$(mktemp)"
+
+python3 -I "$HERE/mock_printful.py" "$LOG" &
+MOCK_PID=$!
+(cd "$ROOT" && exec npx cf dev --mode mock >"$DEV_LOG" 2>&1) &
+DEV_PID=$!
+cleanup() { kill "$MOCK_PID" "$DEV_PID" 2>/dev/null || true; rm -f "$LOG" "$DEV_LOG"; }
+trap cleanup EXIT
+
+for _ in $(seq 1 60); do
+  curl -sf -o /dev/null http://localhost:5173/ && break
+  sleep 1
+done
+
+python3 -I "$HERE/e2e.py" http://localhost:5173 "$LOG"

@@ -11,7 +11,7 @@ description: >
 license: MIT
 compatibility: Requires the printful-api skill from the same plugin, bash, curl, python3, network access, and PRINTFUL_API_TOKEN.
 metadata:
-  version: "0.3.1"
+  version: "0.4.0"
 ---
 
 # Printful reports and monitoring

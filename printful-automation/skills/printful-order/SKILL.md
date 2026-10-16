@@ -12,7 +12,7 @@ description: >
 license: MIT
 compatibility: Requires the printful-api skill from the same plugin, bash, curl, python3, network access to api.printful.com, and PRINTFUL_API_TOKEN.
 metadata:
-  version: "0.3.1"
+  version: "0.4.0"
 ---
 
 # Printful orders
@@ -27,6 +27,9 @@ GATE="<this skill directory>/scripts/confirm-gate.py"
 WAIT="<this skill directory>/scripts/wait-order-costs.sh"
 CONFIG="${PRINTFUL_CONFIG:-$HOME/.config/printful-automation/config.json}"
 ```
+
+With the Printful connector, use its tools in place of `$PF` and `$WAIT`
+(see "Through the Printful connector" in `printful-api`).
 
 Use v2 for everything except ordering a saved (sync) product and cancelling a
 confirmed order. Endpoint details: `../printful-api/references/endpoints-v2.md`

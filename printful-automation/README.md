@@ -8,6 +8,15 @@ pays for the order, and tracks the delivery.
 
 ## Changelog
 
+### v0.4.0
+
+- Bundles the **printful** connector, a remote MCP server
+  ([`../printful-mcp`](../printful-mcp)). In Claude chat, the skills reach
+  Printful through it, and you give your token to its sign-in page instead
+  of the chat.
+- `printful-api` and `printful-order` use the connector's tools when they're
+  available and `pf.sh` otherwise.
+
 ### v0.3.1
 
 - Syncs to claude.ai: the marketplace entry sets `"strict": false`, and its
@@ -40,6 +49,7 @@ pays for the order, and tracks the delivery.
 ```text
 printful-automation/
 ├── plugin.json                    # Agent Plugins manifest
+├── mcp.json                       # the printful connector (remote MCP server)
 ├── skills/                        # Agent Skills (agentskills.io format)
 │   ├── printful-api/
 │   │   ├── SKILL.md               # conventions, config, version routing, safety
@@ -56,7 +66,7 @@ printful-automation/
 ```
 
 There are no client-specific files, so any client that loads Agent Plugins
-skills can use the package as it is. Skills call each other's scripts through
+skills and MCP servers can use the package as it is. Skills call each other's scripts through
 relative paths such as `../printful-api/scripts/pf.sh`.
 
 ## How it fits together
@@ -173,30 +183,53 @@ The plugin has no `.claude-plugin/plugin.json`. Its entry in
 `../.claude-plugin/marketplace.json` is the manifest instead, so that entry
 sets `"strict": false` (claude.ai's marketplace sync skips the plugin without
 it) and repeats the `version`, `description` and `keywords` from
-`plugin.json`. Bump all three versions together: `plugin.json`, the
-marketplace entry and each skill's `metadata.version`. claude.ai syncs again
-when a merged pull request bumps the version.
+`plugin.json`. The entry also declares the connector in `mcpServers`, since
+Claude reads `.mcp.json` rather than the Agent Plugins `mcp.json`. Keep its
+URL the same as `mcp.json`'s. Bump all three versions together:
+`plugin.json`, the marketplace entry and each skill's `metadata.version`.
+claude.ai syncs again when a merged pull request bumps the version.
 
 ```bash
 /plugin install printful-automation@ibby-plugins
 ```
 
-In claude.ai chat, the skills run in Claude's code-execution sandbox. If its
-network egress (**Settings > Capabilities**) is not set to all domains, add
-the ones you need to the allowlist. Pillow installs from PyPI, which the
+### The printful connector
+
+In claude.ai chat, the skills run in a code-execution sandbox. It has no
+`PRINTFUL_API_TOKEN`, and its home directory doesn't last between
+conversations. The plugin therefore bundles a connector,
+`https://printful-mcp.ibrahim-aka-ajax.workers.dev/mcp`, that holds the token for you:
+
+1. After installing the plugin, connect **printful** in Claude's connector
+   settings (or when Claude first asks).
+2. The connector opens its own sign-in page. Paste a Printful private token
+   there (and a store ID if it's an account-level token). Don't paste it into
+   the chat. The token is checked with Printful and stored encrypted inside
+   that connection.
+3. Claude then uses `printful_get`, `printful_request` and
+   `printful_guarded_request`. Paying for, cancelling or deleting anything
+   only goes through the last one, so you can keep that tool on approval.
+
+Revoke the token in Printful to disconnect it everywhere. With no local
+config file in chat, Claude asks for your address when it needs it, and every
+order needs an explicit yes. How the server works and how to redeploy it:
+[`../printful-mcp/README.md`](../printful-mcp/README.md).
+
+In Claude Code, the connector is added too. With `PRINTFUL_API_TOKEN` set
+you can skip connecting it: the skills fall back to `pf.sh`.
+
+### Sandbox network access
+
+The connector calls Printful from Cloudflare, so the sandbox doesn't need
+`api.printful.com`. Image generation and R2 hosting still run in the sandbox.
+If its network egress (**Settings > Capabilities**) is not set to all
+domains, add the ones you use. Pillow installs from PyPI, which the
 package-manager setting covers.
 
 | Needed for | Domains |
 | --- | --- |
-| Every skill | `api.printful.com` |
 | Image generation (whichever you use) | `api.openai.com`, `api.ideogram.ai`, `external.api.recraft.ai`, `generativelanguage.googleapis.com`, `api.bfl.ai`, `fal.run`, `queue.fal.run`, `api.replicate.com` |
 | R2 hosting | `api.cloudflare.com` (wrangler) or `<account-id>.r2.cloudflarestorage.com` (aws CLI), plus your bucket's public host |
-
-The sandbox has no shell profile, and its home directory does not last
-between conversations, so `PRINTFUL_API_TOKEN` and
-`~/.config/printful-automation/config.json` are not there by default. Claude
-Code, and other clients running on your own machine, read both as described
-in [Setup](#setup).
 
 ## API notes
 

@@ -18,10 +18,13 @@
     {
       "name": "printful-automation",
       "description": "Design, buy and ship custom merch with Printful: generate artwork with image APIs, check print readiness, browse the catalog and make mockups, place and pay for orders, track deliveries and report spending. Uses Printful API v2 first, with v1 only for saved products and cancellations.",
-      "version": "0.3.1",
+      "version": "0.4.0",
       "author": { "name": "Ibrahim Saidi" },
       "source": "./printful-automation",
       "strict": false,
+      "mcpServers": {
+        "printful": { "type": "http", "url": "https://printful-mcp.ibrahim-aka-ajax.workers.dev/mcp" }
+      },
       "category": "productivity",
       "homepage": "https://developers.printful.com/docs/",
       "repository": "https://github.com/Saidiibrahim/plugins",

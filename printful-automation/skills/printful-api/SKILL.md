@@ -10,9 +10,9 @@ description: >
   my shipping address", or when another printful-* skill needs to make a
   request.
 license: MIT
-compatibility: Requires bash, curl, python3, network access to api.printful.com, and a PRINTFUL_API_TOKEN environment variable. jq recommended.
+compatibility: Requires either the Printful connector from the same plugin (Claude chat), or bash, curl, python3, network access to api.printful.com and a PRINTFUL_API_TOKEN environment variable. jq recommended.
 metadata:
-  version: "0.3.1"
+  version: "0.4.0"
 ---
 
 # Printful API conventions
@@ -54,8 +54,14 @@ The two versions differ in ways that break things if mixed up:
 
 ## Authentication
 
-- The token lives in `PRINTFUL_API_TOKEN`. Never ask the user to paste it into
-  chat and never write it into any file.
+- Never ask the user to paste a Printful token into chat, and never write one
+  into any file.
+- **With the Printful connector** (the `printful_get` tool is available), the
+  token lives in the connector: the user pasted it into the connector's own
+  sign-in page, not into the conversation. If the tools are missing or
+  return `401`, tell the user to connect (or reconnect) the **printful**
+  connector from the plugin in their Claude settings. Don't ask for the token.
+- **Locally**, the token lives in `PRINTFUL_API_TOKEN`.
 - If it is missing, tell the user to open https://developers.printful.com,
   create a **Private token** for their store with order, product
   (sync products), file library and webhook-read access, and export it as
@@ -111,7 +117,36 @@ Personal settings live **outside the plugin** in
 
 ## Making requests
 
-Always call the API through the bundled helper `scripts/pf.sh` (relative to
+### Through the Printful connector
+
+When the `printful_get`, `printful_request` and `printful_guarded_request`
+tools are available, use them instead of `pf.sh`. That's the case in Claude
+chat, where the sandbox has no `PRINTFUL_API_TOKEN`. The tools apply the
+same path rules and guards as `pf.sh`, and they return the raw JSON body:
+
+| `pf.sh` call in these skills | Connector tool |
+| --- | --- |
+| `bash "$PF" GET <path>` | `printful_get` with `path` |
+| `bash "$PF" POST\|PUT\|PATCH\|DELETE <path> <body>` | `printful_request` with `method`, `path` and the body as a JSON object |
+| `PF_CONFIRM=yes bash "$PF" <method> <path>` | `printful_guarded_request`, only once the safety rules below are met |
+
+- A failed call comes back as a tool error that starts with
+  `HTTP <status> from <method> <path>: <summary>`. Report the summary the
+  same way.
+- `printful_request` refuses guarded calls and `printful_guarded_request`
+  refuses everything else. Never route around that.
+- `scripts/wait-order-costs.sh` needs `pf.sh`. Poll with `printful_get`
+  instead: `GET /v2/orders/{id}` every 5-10 s until
+  `costs.calculation_status` is `done` or `failed`, for up to 2 minutes.
+- `confirm-gate.py` and `orders-summary.py` work offline. Save the JSON the
+  tools return to a file and run them as usual.
+- No local config file exists in Claude chat. Ask for the delivery address
+  and preferences when needed. `auto_confirm_max_total` is then `null`: every
+  order needs an explicit yes.
+
+### Through `pf.sh`
+
+Otherwise, call the API through the bundled helper `scripts/pf.sh` (relative to
 this skill's directory). Resolve it to an absolute path first, because the
 working directory is usually the user's project:
 
@@ -192,6 +227,7 @@ re-confirming a `failed` order).
 
 ## Quick sanity check
 
-To verify the setup, run `GET /v2/stores` and `GET /v2/oauth-scopes`, then
-report the store name, id and type, the scopes, and whether the local config
-file exists. Do this first when a user says the plugin "isn't working".
+To verify the setup, run `GET /v2/stores` and `GET /v2/oauth-scopes` (with
+`printful_get` or `pf.sh`), then report the store name, id and type, the
+scopes, whether the connector or `pf.sh` made the calls, and whether the
+local config file exists. Do this first when a user says the plugin "isn't working".

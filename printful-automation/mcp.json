@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "printful": {
+      "type": "streamable-http",
+      "url": "https://printful-mcp.ibrahim-aka-ajax.workers.dev/mcp"
+    }
+  }
+}
