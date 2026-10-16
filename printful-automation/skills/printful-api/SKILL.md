@@ -12,7 +12,7 @@ description: >
 license: MIT
 compatibility: Requires either the Printful connector from the same plugin (Claude chat), or bash, curl, python3, network access to api.printful.com and a PRINTFUL_API_TOKEN environment variable. jq recommended.
 metadata:
-  version: "0.4.0"
+  version: "0.4.1"
 ---
 
 # Printful API conventions
@@ -57,8 +57,9 @@ The two versions differ in ways that break things if mixed up:
 - Never ask the user to paste a Printful token into chat, and never write one
   into any file.
 - **With the Printful connector** (the `printful_get` tool is available), the
-  token lives in the connector: the user pasted it into the connector's own
-  sign-in page, not into the conversation. If the tools are missing or
+  credentials live in the connector: the user signed in with Printful (or
+  pasted a private token) on the connector's own sign-in page, not in the
+  conversation. If the tools are missing or
   return `401`, tell the user to connect (or reconnect) the **printful**
   connector from the plugin in their Claude settings. Don't ask for the token.
 - **Locally**, the token lives in `PRINTFUL_API_TOKEN`.

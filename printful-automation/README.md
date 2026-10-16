@@ -8,6 +8,11 @@ pays for the order, and tracks the delivery.
 
 ## Changelog
 
+### v0.4.1
+
+- The connector offers **Sign in with Printful**, so there's no token to
+  copy. Pasting a private token is still available as a fallback.
+
 ### v0.4.0
 
 - Bundles the **printful** connector, a remote MCP server
@@ -202,15 +207,16 @@ conversations. The plugin therefore bundles a connector,
 
 1. After installing the plugin, connect **printful** in Claude's connector
    settings (or when Claude first asks).
-2. The connector opens its own sign-in page. Paste a Printful private token
-   there (and a store ID if it's an account-level token). Don't paste it into
-   the chat. The token is checked with Printful and stored encrypted inside
-   that connection.
+2. The connector opens its own sign-in page. Choose **Sign in with Printful**,
+   approve the app on Printful's screen and pick your store. There's no token
+   to copy, and the connection refreshes itself. To use a private token
+   instead, paste it on that page (never into the chat). Either way, the
+   credentials are stored encrypted inside that connection.
 3. Claude then uses `printful_get`, `printful_request` and
    `printful_guarded_request`. Paying for, cancelling or deleting anything
    only goes through the last one, so you can keep that tool on approval.
 
-Revoke the token in Printful to disconnect it everywhere. With no local
+Remove the app (or revoke the token) in Printful to disconnect it everywhere. With no local
 config file in chat, Claude asks for your address when it needs it, and every
 order needs an explicit yes. How the server works and how to redeploy it:
 [`../printful-mcp/README.md`](../printful-mcp/README.md).

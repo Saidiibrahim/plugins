@@ -150,6 +150,82 @@ s, _, _, b = req("POST", f"{BASE}/oauth/token", urllib.parse.urlencode({
     {"Content-Type": "application/x-www-form-urlencoded"})
 check("refresh token works", s == 200 and "access_token" in b, b[:200])
 
+# 10. "Sign in with Printful"
+MOCK = "http://127.0.0.1:8789"
+jar = {}
+def remember(set_cookies):
+    for c in set_cookies:
+        name, _, value = c.split(";", 1)[0].partition("=")
+        jar[name] = value
+def cookie_header():
+    return "; ".join(f"{k}={v}" for k, v in jar.items() if v)
+
+def start_sign_in():
+    jar.clear()
+    s, h, sc, b = req("GET", authorize_url(client_id, REDIRECT))
+    remember(sc)
+    handle = re.search(r'name="handle" value="([^"]+)"', b).group(1)
+    q = re.search(r'name="q" value="([^"]+)"', b).group(1).replace("&#38;", "&")
+    s2, h2, sc2, _ = req("POST", f"{BASE}/authorize",
+                         urllib.parse.urlencode({"handle": handle, "q": q, "decision": "printful"}),
+                         {"Content-Type": "application/x-www-form-urlencoded", "Cookie": cookie_header(), "Origin": BASE})
+    remember(sc2)
+    return b, s2, h2.get("Location", h2.get("location", ""))
+
+page_html, s, printful_url = start_sign_in()
+check("sign-in page offers Printful sign-in with the token form as a fallback",
+      'value="printful"' in page_html and "Use a private token instead" in page_html)
+pq = dict(urllib.parse.parse_qsl(urllib.parse.urlparse(printful_url).query))
+check("approving redirects to Printful's authorize page", s == 302 and printful_url.startswith(f"{MOCK}/oauth/authorize")
+      and pq.get("client_id") == "app-1040801" and pq.get("redirect_url") == f"{BASE}/printful/callback" and pq.get("state"), printful_url)
+
+s, h, _, _ = req("GET", printful_url)
+callback = h.get("Location", h.get("location", ""))
+s, h, _, b = req("GET", callback)
+check("callback without the browser's binding cookie is refused", s == 400 and "connect again" in b, f"{s} {b[:200]}")
+s, h, sc, b = req("GET", callback, headers={"Cookie": cookie_header()})
+loc = h.get("Location", h.get("location", ""))
+params = dict(urllib.parse.parse_qsl(urllib.parse.urlparse(loc).query))
+check("Printful callback finishes the authorization", s == 302 and loc.startswith(REDIRECT) and params.get("code"), f"{s} {loc} {b[:200]}")
+
+s, _, _, b = req("POST", f"{BASE}/oauth/token", urllib.parse.urlencode({
+    "grant_type": "authorization_code", "code": params.get("code", ""), "redirect_uri": REDIRECT,
+    "client_id": client_id, "code_verifier": verifier, "resource": f"{BASE}/mcp"}),
+    {"Content-Type": "application/x-www-form-urlencoded"})
+tok = json.loads(b) if s == 200 else {}
+check("our access token never outlives Printful's (2 min token -> 60 s)", s == 200 and tok.get("expires_in") == 60, b[:300])
+at = tok.get("access_token", "")
+open(LOG, "w").close()
+err, t = call("printful_get", {"path": "/v2/stores"}, 20)
+check("tools use the Printful access token", not err and "Mock Store" in t, t[:200])
+
+s, _, _, b = req("POST", f"{BASE}/oauth/token", urllib.parse.urlencode({
+    "grant_type": "refresh_token", "refresh_token": tok.get("refresh_token", ""), "client_id": client_id}),
+    {"Content-Type": "application/x-www-form-urlencoded"})
+tok2 = json.loads(b) if s == 200 else {}
+check("refreshing our token refreshes Printful's", s == 200 and tok2.get("access_token"), b[:300])
+at = tok2.get("access_token", "")
+err, t = call("printful_get", {"path": "/v2/stores"}, 21)
+log = [json.loads(l) for l in open(LOG)]
+check("Printful saw the rotated refresh token and the new access token",
+      any("grant_type=refresh_token" in e["body"] and "refresh_token=oauth-refresh-1" in e["body"] for e in log)
+      and log[-1]["auth"] == "Bearer oauth-access-2" and not err, str([(e["path"], e["auth"]) for e in log]))
+check("client secret only ever went to Printful's token endpoint",
+      all(e["path"] == "/oauth/token" for e in log if "mock-secret" in e["body"]))
+
+req("POST", f"{MOCK}/__revoke")
+s, _, _, b = req("POST", f"{BASE}/oauth/token", urllib.parse.urlencode({
+    "grant_type": "refresh_token", "refresh_token": tok2.get("refresh_token", ""), "client_id": client_id}),
+    {"Content-Type": "application/x-www-form-urlencoded"})
+check("revoked Printful access ends the grant with invalid_grant", s == 400 and "invalid_grant" in b, f"{s} {b[:200]}")
+
+_, _, printful_url = start_sign_in()
+st = dict(urllib.parse.parse_qsl(urllib.parse.urlparse(printful_url).query)).get("state", "")
+s, h, _, _ = req("GET", f"{BASE}/printful/callback?" + urllib.parse.urlencode({"state": st, "success": "0"}),
+                 headers={"Cookie": cookie_header()})
+loc = h.get("Location", h.get("location", ""))
+check("declining at Printful returns access_denied to the client", s == 302 and loc.startswith(REDIRECT) and "error=access_denied" in loc, loc)
+
 failed = [n for n, ok in results if not ok]
 print(f"\n{len(results) - len(failed)}/{len(results)} passed")
 sys.exit(1 if failed else 0)

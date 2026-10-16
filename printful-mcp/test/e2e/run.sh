@@ -8,11 +8,21 @@ ROOT="$(cd "$HERE/../.." && pwd)"
 LOG="$(mktemp)"
 DEV_LOG="$(mktemp)"
 
+# The mock's client secret, for "Sign in with Printful". Never touches a .dev.vars you already have.
+if [[ ! -e "$ROOT/.dev.vars" ]]; then
+  printf 'PRINTFUL_CLIENT_SECRET=mock-secret\n' >"$ROOT/.dev.vars"
+  CREATED_DEV_VARS=1
+fi
+
 python3 -I "$HERE/mock_printful.py" "$LOG" &
 MOCK_PID=$!
 (cd "$ROOT" && exec npx cf dev --mode mock >"$DEV_LOG" 2>&1) &
 DEV_PID=$!
-cleanup() { kill "$MOCK_PID" "$DEV_PID" 2>/dev/null || true; rm -f "$LOG" "$DEV_LOG"; }
+cleanup() {
+  kill "$MOCK_PID" "$DEV_PID" 2>/dev/null || true
+  rm -f "$LOG" "$DEV_LOG"
+  [[ -n "${CREATED_DEV_VARS:-}" ]] && rm -f "$ROOT/.dev.vars"
+}
 trap cleanup EXIT
 
 for _ in $(seq 1 60); do

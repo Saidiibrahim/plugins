@@ -11,7 +11,7 @@ description: >
 license: MIT
 compatibility: Requires the printful-api skill from the same plugin, bash, curl, python3 with Pillow for image checks, network access, and PRINTFUL_API_TOKEN. Cloudflare R2 hosting needs wrangler or the aws CLI.
 metadata:
-  version: "0.4.0"
+  version: "0.4.1"
 ---
 
 # Printful design files

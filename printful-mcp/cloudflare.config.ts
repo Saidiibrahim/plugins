@@ -17,6 +17,11 @@ export default defineConfig(({ mode }) => {
 				// OAuth clients, grants and tokens; Printful tokens live encrypted in grant props.
 				OAUTH_KV: bindings.kv(),
 				PRINTFUL_API_BASE: bindings.text(mode === "mock" ? MOCK_PRINTFUL_URL : "https://api.printful.com"),
+				// "Sign in with Printful": this Worker is the Printful public app below. Without the
+				// secret, the sign-in page only offers the private-token form.
+				PRINTFUL_OAUTH_BASE: bindings.text(mode === "mock" ? MOCK_PRINTFUL_URL : "https://www.printful.com"),
+				PRINTFUL_CLIENT_ID: bindings.text("app-1040801"),
+				PRINTFUL_CLIENT_SECRET: bindings.secret(),
 				// Hosts the sign-in page may send a grant to; loopback apps (Claude Code) are always allowed.
 				ALLOWED_REDIRECT_HOSTS: bindings.text("claude.ai,claude.com,anysphere.cursor-mcp"),
 			},
